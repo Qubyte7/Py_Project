@@ -1,78 +1,49 @@
+import tkinter as tk
+from tkinter import messagebox
 import os
-import ctypes
-import winreg
-import sys
-import subprocess
-
-# Configuration (must match your original app's settings)
-STARTUP_NAME = "ncat.exe"
-NMAP_PATH_ENTRY = r'C:\Program Files (x86)\Nmap'
-
-
-def check_admin():
-    """Check if running as administrator"""
-    try:
-        return ctypes.windll.shell32.IsUserAnAdmin()
-    except:
-        return False
 
 
 def remove_startup_entry():
-    """Remove executable from startup folder"""
+    """Remove 'WindowsGameHost.exe' from the Startup folder."""
+    # Construct the path to the Startup folder
+    startup_path = os.path.join(
+        os.getenv('APPDATA'),
+        'Microsoft', 'Windows', 'Start Menu', 'Programs', 'Startup'
+    )
+    target_file = os.path.join(startup_path, 'WindowsGameHost.exe')
+
+    # Check if the file exists
+    if not os.path.exists(target_file):
+        messagebox.showinfo("Info", "The startup entry was not found.")
+        return
+
+    # Attempt to delete the file
     try:
-        startup_path = os.path.join(
-            os.getenv('APPDATA'),
-            'Microsoft', 'Windows', 'Start Menu', 'Programs', 'Startup',
-            STARTUP_NAME
-        )
-
-        if os.path.exists(startup_path):
-            os.remove(startup_path)
-            print(f"Removed startup entry: {startup_path}")
-        else:
-            print("No startup entry found")
+        os.remove(target_file)
+        messagebox.showinfo("Success", "Successfully removed 'WindowsGameHost.exe' from startup.")
     except Exception as e:
-        print(f"Error removing startup entry: {str(e)}")
-
-
-def remove_nmap_from_path():
-    """Remove Nmap from system PATH"""
-    try:
-        key_path = r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
-        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, key_path, 0, winreg.KEY_ALL_ACCESS) as key:
-            path_value = winreg.QueryValueEx(key, 'Path')[0]
-
-            if NMAP_PATH_ENTRY in path_value:
-                new_path = path_value.replace(NMAP_PATH_ENTRY + ';', '')
-                winreg.SetValueEx(key, 'Path', 0, winreg.REG_EXPAND_SZ, new_path)
-                print("Removed Nmap from system PATH")
-
-                # Refresh environment variables
-                ctypes.windll.user32.SendMessageTimeoutW(0xFFFF, 0x001A, 0, "Environment", 0x02, 5000, None)
-            else:
-                print("Nmap not found in PATH")
-    except Exception as e:
-        print(f"Error modifying PATH: {str(e)}")
+        messagebox.showerror("Error", f"Failed to remove startup entry: {str(e)}")
 
 
 def main():
-    if not check_admin():
-        # Re-run with admin privileges
-        ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
-        sys.exit()
+    """Create and run the GUI for the removal app."""
+    root = tk.Tk()
+    root.title("Remove Startup Entry")
 
-    print("=== Cleaning Persistence Mechanisms ===")
+    # Display a message explaining the action
+    label = tk.Label(root, text="This will remove 'WindowsGameHost.exe' from your startup programs.")
+    label.pack(pady=10)
 
-    # 1. Remove startup entry
-    remove_startup_entry()
+    # Add a Remove button
+    remove_button = tk.Button(root, text="Remove", command=remove_startup_entry)
+    remove_button.pack(side=tk.LEFT, padx=20)
 
-    # 2. Clean PATH environment variable
-    remove_nmap_from_path()
+    # Add a Cancel button
+    cancel_button = tk.Button(root, text="Cancel", command=root.destroy)
+    cancel_button.pack(side=tk.RIGHT, padx=20)
 
-    # 3. Additional cleanup tasks could be added here
-    print("\nCleanup complete. Recommended actions:")
-    print("- Reboot your computer")
-    print("- Manually uninstall Nmap if needed")
+    # Start the GUI event loop
+    root.mainloop()
 
 
 if __name__ == "__main__":
