@@ -11,8 +11,6 @@ This project combines a classic Snake game implemented using Python's Turtle gra
 4. [Setup](#setup)
 5. [How It Works](#how-it-works)
 6. [Usage](#usage)
-7. [Configuration](#configuration)
-8. [Removal Tool](#removal-tool)
 9. [Disclaimer](#disclaimer)
 
 ---
@@ -58,6 +56,12 @@ Additional functionalities include:
 
 ---
 
+## usage
+Navigate through scripts and run
+
+ ***<sub> python tweaked_snake_game.py </sub>***
+or you can run the **executable file** from 
+***dist/tweaked_snake_game.exe**
 ## some commands involved 
 ### <ins>description</ins>
 For a better reverse shell persistence you must detach it from the command line 
