@@ -2,6 +2,7 @@ import joblib
 import pandas as pd
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from starlette.middleware.cors import CORSMiddleware
 
 # loading mode ,scaler and frequency mapp
 model = joblib.load("../../models/yield_predictor/crop_yield_model.pkl")
@@ -19,6 +20,13 @@ class YieldPredictorInput(BaseModel):
 
 # initializing the app
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins="http://localhost:5173",
+    allow_credentials=True,
+    allow_methods=["GET,POST,PUT,DELETE"],
+    allow_headers=["*"],
+)
 
 
 # defining API
