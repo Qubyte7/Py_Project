@@ -21,11 +21,19 @@ function App() {
       },{
         "Content-type":"application/json"
       });
-      setPrediction(prediction_response.data)
+      if(prediction_response.data.status_code&&prediction_response.data.status_code!=200){
+
+        setError(prediction_response.data.message)
+      }
+      else{
+   setPrediction(prediction_response.data)
       setError("")
+      console.log(prediction_response.data)
+      }
 
     }catch (e){
-      setError("Failed to get prediction. Please check your inputs.");
+      setError(e.message);
+      console.log(e.message)
       setPrediction(null);
     }
   }

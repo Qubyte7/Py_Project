@@ -2,6 +2,8 @@ import joblib
 import pandas as pd
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 # from starlette.middleware.cors import CORSMiddleware
 
 # loading mode ,scaler and frequency mapp
@@ -20,15 +22,14 @@ class YieldPredictorInput(BaseModel):
 
 # initializing the app
 app = FastAPI()
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins="http://localhost:5173",
-#     allow_credentials=True,
-#     allow_methods=["GET,POST,PUT,DELETE"],
-#     allow_headers=["*"],
-# )
-#
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # allow any origin to access the Frontend
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # defining API
@@ -43,8 +44,8 @@ def muhinzi_predict(input_data: YieldPredictorInput):
         crop_frequency = crop_frequency_map.get(plant_name)
         print(crop_frequency)
         if crop_frequency is None:
-            raise HTTPException(status_code=400,
-                                detail="We can't predict for " + plant_name + " yet, try again later !")
+            return ({"status_code":400,
+                                "message":"We don't have Enough data to  predict for " + plant_name + " yet, Please try again later !"})
         # if yes create a dataframe
         # Feature names must be in the same order as they were in fit.
         input_dataframe = pd.DataFrame({
@@ -60,11 +61,14 @@ def muhinzi_predict(input_data: YieldPredictorInput):
         # making prediction
         prediction = model.predict(input_dataframe_scaled)
         # the return type is an array hence the prediction[0] for retrieving
-        return {"Muhinzi predicted : ", prediction[0], " for " + plant_name}
+        print(prediction[0])
+        return prediction[0]
     except Exception as e:
         print(e)
-        raise HTTPException(status_code=500, detail=str("Something went wrong during prediction " + str(e)))
+        error = str(e)
+        #raise HTTPException(status_code=400, detail=error)
+        return error
+
 
 # script to run this file
-#  uvicorn yield_predictor
-# :app --host 127.0.0.1 --port 8000 --reload
+#  uvicorn yield_predictor:app  --host 127.0.0.1 --port 8000
