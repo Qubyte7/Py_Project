@@ -1,9 +1,11 @@
+import json
+
 import joblib
 import pandas as pd
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
+from fastapi import Response
 # from starlette.middleware.cors import CORSMiddleware
 
 # loading mode ,scaler and frequency mapp
@@ -44,8 +46,15 @@ def muhinzi_predict(input_data: YieldPredictorInput):
         crop_frequency = crop_frequency_map.get(plant_name)
         print(crop_frequency)
         if crop_frequency is None:
-            return ({"status_code":400,
-                                "message":"We don't have Enough data to  predict for " + plant_name + " yet, Please try again later !"})
+            return Response(
+                content=json.dump({
+                    "details": f"We don't have Enough data to  predict for { plant_name } yet, Please try again later !"
+                }),
+                status_code=400,
+                media_type="application/json"
+            )
+            # return ({"status_code":400,
+            #                     "message":"We don't have Enough data to  predict for " + plant_name + " yet, Please try again later !"})
         # if yes create a dataframe
         # Feature names must be in the same order as they were in fit.
         input_dataframe = pd.DataFrame({
@@ -71,4 +80,4 @@ def muhinzi_predict(input_data: YieldPredictorInput):
 
 
 # script to run this file
-#  uvicorn yield_predictor:app  --host 127.0.0.1 --port 8000
+#  uvicorn yield_predictor:app  --host 127.0.0.1 --port 8000 --reload

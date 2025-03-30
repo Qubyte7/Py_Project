@@ -10,6 +10,7 @@ function App() {
   const [average_temperature,setAverage_Temperature] = useState("")
   const [prediction, setPrediction] = useState(null);
   const [error, setError] = useState("");
+
   const handleSubmit = async (e)=>{
     e.preventDefault();
     try {
@@ -18,23 +19,32 @@ function App() {
         crop_name: cropType,
         average_temperature_per_year: parseFloat(average_temperature),
         pesticide_tonnes_per_year: parseFloat(pesticide)
-      },{
+        },{
         "Content-type":"application/json"
       });
-      if(prediction_response.data.status_code&&prediction_response.data.status_code!=200){
 
-        setError(prediction_response.data.message)
-      }
-      else{
-   setPrediction(prediction_response.data)
+      setPrediction(prediction_response.data)
       setError("")
       console.log(prediction_response.data)
-      }
+
+      // if(prediction_response.data.status_code&&prediction_response.data.status_code!=200){
+      //
+      //   setError(prediction_response.data.details)
+      //
+      // }
+      // else{
+      // setPrediction(prediction_response.data)
+      // setError("")
+      // console.log(prediction_response.data)
+      // }
+
 
     }catch (e){
-      setError(e.message);
-      console.log(e.message)
-      setPrediction(null);
+      console.log(e)
+    if (error.response?.status === 400){
+      alert(error.response?.detail);
+      setError(e.data.detail)
+    }
     }
   }
   return (
