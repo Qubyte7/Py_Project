@@ -1,3 +1,6 @@
+### NB : You have to run ===> *" Yield_predector.ipynb "* to get model's.pkl 
+
+
 ## Difference betwee .pkl and .pt
 ### *.pkl*
 
